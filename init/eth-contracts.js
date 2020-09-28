@@ -93,6 +93,22 @@ class InitEthErc20 {
   }
 }
 
+class InitEthErc721 {
+  static async execute() {
+    const ethContractInitializer = new EthContractInitializer()
+    const contractName = 'erc721'
+    const success = await ethContractInitializer.execute(
+        contractName,
+        [],
+        3000000
+    )
+    if (!success) {
+      console.log("Can't deploy", contractName)
+      throw 1
+    }
+  }
+}
+
 class InitEthLocker {
   static async execute() {
     const ethContractInitializer = new EthContractInitializer()
@@ -107,6 +123,28 @@ class InitEthLocker {
         RainbowConfig.getParam('eth-prover-address'),
       ],
       5000000
+    )
+    if (!success) {
+      console.log("Can't deploy", contractName)
+      throw 1
+    }
+  }
+}
+
+class InitEthERC721Locker {
+  static async execute() {
+    const ethContractInitializer = new EthContractInitializer()
+    const contractName = 'erc721Locker'
+    const success = await ethContractInitializer.execute(
+        contractName,
+        [
+          Buffer.from(
+              RainbowConfig.getParam('near-token-factory-account'),
+              'utf8'
+          ),
+          RainbowConfig.getParam('eth-prover-address'),
+        ],
+        5000000
     )
     if (!success) {
       console.log("Can't deploy", contractName)
@@ -164,6 +202,8 @@ class InitEthProver {
 
 exports.InitEthEd25519 = InitEthEd25519
 exports.InitEthErc20 = InitEthErc20
+exports.InitEthErc721 = InitEthErc721
 exports.InitEthLocker = InitEthLocker
+exports.InitEthERC721Locker = InitEthERC721Locker
 exports.InitEthClient = InitEthClient
 exports.InitEthProver = InitEthProver
