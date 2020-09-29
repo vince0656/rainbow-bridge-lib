@@ -139,7 +139,7 @@ class InitEthERC721Locker {
         contractName,
         [
           Buffer.from(
-              RainbowConfig.getParam('near-token-factory-account'),
+              RainbowConfig.getParam('near-non-fun-token-account'),
               'utf8'
           ),
           RainbowConfig.getParam('eth-prover-address'),
