@@ -138,10 +138,8 @@ class InitEthERC721Locker {
     const success = await ethContractInitializer.execute(
         contractName,
         [
-          Buffer.from(
-              RainbowConfig.getParam('near-non-fun-token-account'),
-              'utf8'
-          ),
+          RainbowConfig.getParam('eth-erc721-address'),
+          Buffer.from(RainbowConfig.getParam('near-non-fun-token-account'), 'utf8'),
           RainbowConfig.getParam('eth-prover-address'),
         ],
         5000000
