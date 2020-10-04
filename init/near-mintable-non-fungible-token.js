@@ -7,20 +7,20 @@ class InitNearNonFunToken {
   static async execute() {
     const masterAccount = RainbowConfig.getParam('near-master-account')
     const masterSk = RainbowConfig.getParam('near-master-sk')
-    const tokenAccount = RainbowConfig.getParam('near-fun-token-account')
-    let tokenSk = RainbowConfig.maybeGetParam('near-fun-token-sk')
+    const tokenAccount = RainbowConfig.getParam('near-non-fun-token-account')
+    let tokenSk = RainbowConfig.maybeGetParam('near-non-fun-token-sk')
     if (!tokenSk) {
       console.log(
         'Secret key for non fungible token is not specified. Reusing master secret key.'
       )
       tokenSk = masterSk
-      RainbowConfig.setParam('near-fun-token-sk', tokenSk)
+      RainbowConfig.setParam('near-non-fun-token-sk', tokenSk)
     }
     const tokenContractPath = RainbowConfig.getParam(
       'near-non-fun-token-contract-path'
     )
     const tokenInitBalance = RainbowConfig.getParam(
-      'near-fun-token-init-balance'
+      'near-non-fun-token-init-balance'
     )
     const proverAccount = RainbowConfig.getParam('near-prover-account')
 
@@ -68,7 +68,7 @@ class InitNearNonFunToken {
     try {
       // Try initializing the contract.
       // @ts-ignore
-      const lockerAddress = RainbowConfig.getParam('eth-locker-address')
+      const lockerAddress = RainbowConfig.getParam('eth-erc721Locker-address')
       await tokenContract.new(
         {
           prover_account: proverAccount,
