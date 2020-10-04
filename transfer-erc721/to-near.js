@@ -63,14 +63,14 @@ class TransferExampleERC721ToNear {
   }) {
     try {
       console.log(
-        `Transferring tokens from the ERC20 account to the token locker account ${Number(
-          amount
-        )}.`
+        `Transferring token [${Number(
+            amount
+        )}] from the ERC721 account to the token locker account.`
       )
       const transaction = await robustWeb3.callContract(
         ethTokenLockerContract,
         'lockToken',
-        [tokenAddress, Number(amount), nearReceiverAccount],
+        [Number(amount), nearReceiverAccount],
         {
           from: ethSenderAccount,
           gas: 5000000,
@@ -374,7 +374,7 @@ class TransferExampleERC721ToNear {
     const ethTokenLockerContract = new web3.eth.Contract(
       // @ts-ignore
       JSON.parse(
-        fs.readFileSync(RainbowConfig.getParam('eth-erc712Locker-abi-path'))
+        fs.readFileSync(RainbowConfig.getParam('eth-erc721Locker-abi-path'))
       ),
       RainbowConfig.getParam('eth-erc721Locker-address')
     )
