@@ -7,7 +7,7 @@ const {
   receiptFromWeb3,
   logFromWeb3,
 } = require('../eth-proof-extractor')
-const { tokenAddressParam, tokenAccountParam } = require('./deploy-token')
+const { tokenAddressParam } = require('./deploy-token')
 const { verifyAccount } = require('../rainbow/helpers')
 const { NearMintableToken } = require('../near-mintable-token')
 const { RainbowConfig } = require('../config')
@@ -263,6 +263,48 @@ class TransferExampleERC721ToNear {
     }
   }
 
+  static async mint({
+    proof_locker,
+    nearTokenContract,
+    nearTokenContractBorsh,
+    new_owner_id,
+  }) {
+    // @ts-ignore
+    // const old_balance = await nearTokenContract.get_balance({
+    //   owner_id: new_owner_id,
+    // })
+    // console.log(
+    //   `Balance of ${new_owner_id} before the transfer is ${old_balance}`
+    // )
+    console.log('minting the equiv 721 on the NEAR side');
+
+    // @ts-ignore
+    try {
+      await nearTokenContractBorsh.mint(
+          proof_locker,
+          new BN('300000000000000'),
+          // We need to attach tokens because minting increases the contract state, by <600 bytes, which
+          // requires an additional 0.06 NEAR to be deposited to the account for state staking.
+          // Note technically 0.0537 NEAR should be enough, but we round it up to stay on the safe side.
+          new BN('100000000000000000000').mul(new BN('600'))
+      )
+      console.log('Transferred')
+    } catch (e) {
+      console.log('Mint failed with error:')
+      console.log(e)
+      TransferExampleERC721ToNear.showRetryAndExit()
+    }
+
+    // @ts-ignore
+    // const new_balance = await nearTokenContract.get_owner({
+    //   owner_id: new_owner_id,
+    // })
+    // console.log(
+    //     `Balance of ${new_owner_id} after the transfer is ${new_balance}`
+    // )
+    TransferExampleERC721ToNear.deleteTransferLog()
+  }
+
   static async execute(command) {
     initialCmd = command.parent.rawArgs.join(' ')
     let transferLog = TransferExampleERC721ToNear.loadTransferLog()
@@ -312,14 +354,6 @@ class TransferExampleERC721ToNear {
     )
     await verifyAccount(near, nearMasterAccountId)
 
-    const nearFactoryContract = new nearlib.Contract(
-      nearMasterAccount,
-      RainbowConfig.getParam('near-token-factory-account'),
-      {
-        changeMethods: ['deposit'],
-        viewMethods: [],
-      }
-    )
     const nearTokenContract = new nearlib.Contract(
         nearMasterAccount,
         RainbowConfig.getParam('near-non-fun-token-account'),
@@ -328,11 +362,11 @@ class TransferExampleERC721ToNear {
           viewMethods: ['get_token_owner'],
         }
     )
-    const nearFactoryContractBorsh = new NearMintableToken(
-      nearMasterAccount,
-      RainbowConfig.getParam('near-non-fun-token-account')
+    const nearTokenContractBorsh = new NearMintableToken(
+        nearMasterAccount,
+        RainbowConfig.getParam('near-non-fun-token-account')
     )
-    await nearFactoryContractBorsh.accessKeyInit()
+    await nearTokenContractBorsh.accessKeyInit()
 
     const extractor = new EthProofExtractor()
     extractor.initialize(RainbowConfig.getParam('eth-node-url'))
@@ -387,10 +421,9 @@ class TransferExampleERC721ToNear {
       transferLog = TransferExampleERC721ToNear.loadTransferLog()
     }
     if (transferLog.finished === 'block-safe') {
-      await TransferExampleERC721ToNear.deposit({
-        nearFactoryContract,
-        nearFactoryContractBorsh,
+      await TransferExampleERC721ToNear.mint({
         nearTokenContract,
+        nearTokenContractBorsh,
         ...transferLog,
       })
     }
